@@ -1,0 +1,17 @@
+# Ignorar ejecutables de Fortran
+*.exe
+*.out
+
+# Ignorar archivos compilados intermedios y módulos
+*.o
+*.mod
+
+# Ignorar carpetas de datos masivos (ajusta el nombre si es distinto)
+out/
+out_lindblad/
+out_monte_carlo/
+*.dat
+
+# Ignorar archivos ocultos del sistema
+.DS_Store
+Thumbs.db
