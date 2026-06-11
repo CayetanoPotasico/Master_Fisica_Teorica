@@ -12,6 +12,9 @@
 !   partir del vector de estado psi y se resuelve el sistema de ecuaciones lineales de solución
 !   J_ij. El sistema proviene de un artículo científico, y se puede encontrar en arXiv:1906.05146.
 !
+!   ---> ES MUY IMPORTANTE CREAR LA CARPETA /out ANTES DE EJECUTAR EL PROGRAMA PARA QUE FORTRAN
+!   ---> EXPORTE LOS DATOS SIN DAR ERRORES.
+!
 !------------------------------------------------------------------------------------------------
 !   Compilación y ejecución (opciones):
 !       gfortran cbp_subs_qinf.f90 cbp_main_qinf.f90 -llapack -lblas -fopenmp -o cbp_main_qinf.exe

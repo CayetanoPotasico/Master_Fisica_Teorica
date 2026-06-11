@@ -12,6 +12,9 @@
 !   donde sigma_z es la matriz de Pauli Z.
 !   Este sistema está sometido a un decaimineto |+> -> |-> con una constante de decaimiento gamma.
 !
+!   ---> ES MUY IMPORTANTE CREAR LAS CARPETAS /out_lindblad Y /out_monte_carlo ANTES DE EJECUTAR
+!   ---> EL PROGRAMA PARA QUE FORTRAN EXPORTE LOS DATOS SIN DAR ERRORES.
+!
 !------------------------------------------------------------------------------------------------
 !   Compilación y ejecución (opciones):
 !       gfortran cbp_ej9_qinf.f90 -llapack -lblas -fopenmp -o cbp_ej9_qinf.exe
