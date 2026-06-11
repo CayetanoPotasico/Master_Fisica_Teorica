@@ -23,14 +23,14 @@ stats = df.groupby('Gamma')['S15'].agg(['mean', 'std']).reset_index()
 # 3. Dibujar la curva
 plt.figure(figsize=(10, 6))
 
-plt.plot(stats['Gamma'], stats['mean'], '.-', color="#E63301")
+plt.plot(stats['Gamma'], stats['mean'], '.-', color="#E63301", label=r'$\langle S_{15} \rangle \pm 1\sigma$')
 plt.fill_between(stats['Gamma'], stats['mean'] - stats['std'], stats['mean'] + stats['std'], color="#E66101", alpha=0.2)
 
 plt.title('Entropía Media de Entrelazamiento de los 4 primeros qubits', fontsize=14, fontweight='bold')
 plt.xlabel(r'$\Gamma$', fontsize=12)
 plt.ylabel(r'$\langle S_{15} \rangle$', fontsize=12)
 plt.grid(True, linestyle=':', alpha=0.7)
-# plt.legend()
+plt.legend()
 plt.tight_layout()
 
 # Guardar y mostrar
