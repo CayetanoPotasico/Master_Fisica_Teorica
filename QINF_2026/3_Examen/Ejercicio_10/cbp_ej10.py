@@ -20,6 +20,8 @@ df = pd.read_csv('cbp_ej10_entropias_S15.dat', sep=r'\s+', comment='#',
 # 2. Agrupar por Gamma para sacar la media y la desviación estándar
 stats = df.groupby('Gamma')['S15'].agg(['mean', 'std']).reset_index()
 
+print(stats)
+
 # 3. Dibujar la curva
 plt.figure(figsize=(10, 6))
 
