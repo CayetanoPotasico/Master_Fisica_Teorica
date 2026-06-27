@@ -114,7 +114,7 @@ contains
         coef_diag = 2.0d0**(Nqubits - 1)
         coef_offdiag = 2.0d0**(Nqubits - 2)
 
-        ! 1. Construcción de la matriz de coeficientes M
+        ! Construcción de la matriz de coeficientes M
         do i = 1, Np
             do j = 1, Np
                 if (i == j) then
@@ -125,15 +125,14 @@ contains
             end do
         end do
 
-        ! 2. Preparación del vector de salida
-        ! LAPACK utiliza el mismo espacio de memoria para b y para la solucion X (J_vector)
+        ! Preparación del vector de salida
         J_vector = b
 
-        ! 3. Llamada a LAPACK (DGESV)
+        ! Llamada a LAPACK (DGESV)
         ! Resuelve el sistema M * J = b
         call dgesv(Np, 1, M, Np, ipiv, J_vector, Np, info)
 
-        ! Verificación de convergencia
+        ! Verificación
         if (info == 0) then
             write(*,*) "    -> Sistema lineal resuelto con exito."
         else
@@ -156,7 +155,7 @@ contains
         implicit none
         integer(kind=4), intent(in) :: dim
         complex(kind=8), intent(in) :: matrix(0:dim-1, 0:dim-1)
-        real(kind=8), intent(out)   :: S
+        real(kind=8), intent(out) :: S
 
         ! Parámetros internos para la comunicación con LAPACK (ZHEEV)
         complex(kind=8) :: A(dim, dim)            ! Copia de trabajo de la matriz
@@ -165,26 +164,23 @@ contains
         real(kind=8), allocatable    :: RWORK(:)
         integer(kind=4) :: INFO, LWORK, i
 
-        ! 1. Inicialización y copia de seguridad
+        ! Inicialización y copia de seguridad
         ! ZHEEV sobrescribe la matriz de entrada con vectores propios, por eso usamos 'A'
         A = matrix
         S = 0.0d0
 
-        ! 2. Configuración del espacio de trabajo (Query de memoria para LAPACK)
-        ! LWORK define el tamaño del array de trabajo óptimo para la diagonalización
+        ! Configuración del espacio de trabajo
         LWORK = max(1, 2*dim-1)
         allocate(WORK(LWORK), RWORK(max(1, 3*dim-2)))
 
-        ! 3. LLAMADA A LAPACK (ZHEEV)
-        ! 'N' = No calcular autovectores (Job: None)
-        ! 'U' = Usar triángulo superior (Upper triangle)
+        ! 'N' = No calcular autovectores
+        ! 'U' = Usar triángulo superior
         call zheev('N', 'U', dim, A, dim, W, WORK, LWORK, RWORK, INFO)
 
-        ! 4. Cálculo final de la entropía si la operación fue exitosa (INFO=0)
+        ! Cálculo de entropía
         if (INFO == 0) then
             do i = 1, dim
-                ! Filtro numérico: se ignoran autovalores nulos o negativos por ruido
-                ! para evitar errores en el cálculo del logaritmo natural.
+                ! Se ignoran autovalores nulos o negativos por ruido
                 if (W(i) > 1.0d-14) then
                     S = S - W(i) * log(W(i))
                 end if
@@ -193,7 +189,6 @@ contains
             write(*,*) "¡Error en ZHEEV! No se pudo diagonalizar la matriz. INFO =", INFO
         end if
 
-        ! Liberación de memoria temporal
         deallocate(WORK, RWORK)
         
     end subroutine get_von_neumann_entropy
@@ -212,11 +207,11 @@ contains
         implicit none
         integer(kind=4), intent(in) :: Nqubits
         complex(kind=8), intent(in) :: psi(0:2**Nqubits-1)
-        real(kind=8), intent(out)   :: S_vector(0:2**Nqubits-1)
+        real(kind=8), intent(out) :: S_vector(0:2**Nqubits-1)
 
         integer(kind=4) :: I, complement, dim_A, n_A, b
         complex(kind=8), allocatable :: rho_A(:,:)
-        real(kind=8)    :: entropy
+        real(kind=8) :: entropy
 
         ! Recorremos solo la mitad de las configuraciones (0 a 2^(Nqubits-1) - 1) ya que la entropía de una partición es idéntica a la de su complemento.
         !$omp parallel do private(I, n_A, b, dim_A, rho_A, entropy, complement)
@@ -235,7 +230,7 @@ contains
                 entropy = 0.0d0
             else
 
-                ! A. Inicialización de la matriz de densidad reducida
+                ! Inicialización de la matriz de densidad reducida
                 allocate(rho_A(0:dim_A-1, 0:dim_A-1))
 
                 ! Tomamos la traza parcial sobre el subsistema B
@@ -303,14 +298,12 @@ contains
         ! Obtención de la matriz de densidad reducida rho_A
         rho_A = 0.0d0
 
-        ! --- OPTIMIZACIÓN: Intercambiamos i y j para respetar el orden de columnas de Fortran ---
         do j = 0, dim_A - 1
             scatter_bits_j_A = scatter_bits(j, n_A, map_A)
             
             do i = 0, dim_A - 1
                 scatter_bits_i_A = scatter_bits(i, n_A, map_A)
                 
-                ! El bucle k (la traza) se queda dentro
                 do k = 0, 2**n_B - 1
                     scatter_bits_k_B = scatter_bits(k, n_B, map_B)
                     

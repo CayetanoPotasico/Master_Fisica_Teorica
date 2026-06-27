@@ -19,7 +19,6 @@ plt.rcParams.update({
 })
 
 
-# 1. Configuración de rutas y parámetros
 input_dir = "out_monte_carlo"
 output_dir = "plots_monte_carlo"
 os.makedirs(output_dir, exist_ok=True)
@@ -32,25 +31,24 @@ states = [
     r"Estado $|+\rangle$ $[1,0,0]$"
 ]
 
-# Colores institucionales y limpios para el artículo
 colors = {'x': '#E66101', 'y': '#5E3C99', 'z': '#FDB863'}
 state_colors = ['#1b9e77', '#d95f02', '#7570b3']
 
 # ==============================================================================
-# SCRIPT 1: PANEL GENERAl 3x3 (Evolución de x, y, z vs Tiempo)
+# 1: PANEL GENERAl 3x3 (Evolución de x, y, z vs Tiempo)
 # ==============================================================================
 fig, axes = plt.subplots(3, 3, figsize=(15, 11), sharex='col')
 
 for i in range(3):     # Bucle para filas (Estados Iniciales)
     for j in range(3): # Bucle para columnas (Valores de Gamma)
-        # Identificador idéntico al de Fortran: i*10 + j (ajustando índices 1-3)
+
         g_idx = i + 1
         s_idx = j + 1
         file_id = g_idx*10 + s_idx # Formato 11, 12, 13...
         file_path = os.path.join(input_dir, f"cbp_ej9_monte_carlo_{file_id}.dat")
         
         if os.path.exists(file_path):
-            # Leemos ignorando las líneas de comentarios '#' y usando espacios como delimitador
+            
             df = pd.read_csv(file_path, sep=r'\s+', comment='#', names=['t', 'x', 'y', 'z'])
 
             ax = axes[j, i] # Fila = Estado, Columna = Gamma
@@ -84,16 +82,16 @@ print(f"[+] Guardado panel temporal en: {grid_out}")
 
 
 # ==============================================================================
-# SCRIPT 2: TRAYECTORIAS 3D EN LA ESFERA DE BLOCH (Un gráfico por cada Gamma)
+# 2: TRAYECTORIAS 3D EN LA ESFERA DE BLOCH (Un gráfico por cada Gamma)
 # ==============================================================================
-# Definición geométrica de la esfera unitaria de fondo
+# Esfera unitaria de fondo
 u = np.linspace(0, 2 * np.pi, 30)
 v = np.linspace(0, np.pi, 30)
 x_sphere = np.outer(np.cos(u), np.sin(v))
 y_sphere = np.outer(np.sin(u), np.sin(v))
 z_sphere = np.outer(np.ones(np.size(u)), np.cos(v))
 
-for i in range(3): # Creamos un gráfico 3D independiente para cada valor de gamma
+for i in range(3):
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111, projection='3d')
     
@@ -105,7 +103,7 @@ for i in range(3): # Creamos un gráfico 3D independiente para cada valor de gam
     ax.plot([0, 0], [-1, 1], [0, 0], color='k', linestyle=':', alpha=0.4)
     ax.plot([0, 0], [0, 0], [-1, 1], color='k', linestyle=':', alpha=0.4)
     
-    # Marcar explícitamente el sumidero estacionario final
+    # Marcar explícitamente el punto estacionario final
     x_ss = -gammas[i]**2 / (gammas[i]**2 + 8)
     y_ss = 4 / gammas[i] * x_ss
     z_ss = 0
@@ -125,7 +123,6 @@ for i in range(3): # Creamos un gráfico 3D independiente para cada valor de gam
             # Punto de inicio resaltado
             ax.scatter([df['x'].iloc[0]], [df['y'].iloc[0]], [df['z'].iloc[0]], color=state_colors[j], s=30)
 
-    # Configuración estética del espacio 3D
     ax.set_xlim([-1.05, 1.05])
     ax.set_ylim([-1.05, 1.05])
     ax.set_zlim([-1.05, 1.05])
@@ -135,7 +132,7 @@ for i in range(3): # Creamos un gráfico 3D independiente para cada valor de gam
     ax.set_title(f"Trayectorias en la Esfera de Bloch\n{gamma_labels[i]}", fontsize=12, fontweight='bold', pad=15)
     ax.legend(loc='lower left', bbox_to_anchor=(0.0, 0.75), frameon=True, fontsize=9)
     
-    # Ajustamos la perspectiva inicial para que se aprecien bien los tres ejes
+    # Ajuste de perspectiva
     ax.view_init(elev=20, azim=45)
 
     fig_3d_out = os.path.join(output_dir, f"bloch_3d_gamma_monte_carlo_{g_idx}.pdf")

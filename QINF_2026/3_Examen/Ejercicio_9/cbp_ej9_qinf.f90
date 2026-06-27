@@ -112,7 +112,7 @@ program cbp_ej9_qinf
 
         vector = init_vector
 
-        ! Evolucion temporal
+        ! Evolución temporal
         do t = 0, Ntime_steps
             time = t * dt
             write(10,*) time, vector(:)
@@ -215,8 +215,8 @@ program cbp_ej9_qinf
         
 
         complex(8) :: init_psi(2), psi(2)
-        real(8)    :: x, y, z, dp, epsilon, norm
-        integer    :: m
+        real(8) :: x, y, z, dp, epsilon, norm
+        integer :: m
 
         Ntime_steps = ceiling(T_final / dt)
 
@@ -305,30 +305,23 @@ program cbp_ej9_qinf
         implicit none
 
         complex(8), intent(inout) :: psi(2)
-        real(8), intent(in)        :: gamma
-        real(8), intent(in)        :: dt
+        real(8), intent(in) :: gamma
+        real(8), intent(in) :: dt
 
         complex(8) :: k1(2), k2(2), k3(2), k4(2)
         complex(8) :: psi_temp(2)
 
-        ! Algoritmo de Runge-Kutta de orden 4 para amplitudes complejas
-        
-        ! k1 en el instante t original
         call dpsidt_rk4(psi, gamma, k1)
         psi_temp = psi + k1 * dt / 2.0d0
 
-        ! k2 en el punto medio t + dt/2 usando k1
         call dpsidt_rk4(psi_temp, gamma, k2)
         psi_temp = psi + k2 * dt / 2.0d0
 
-        ! k3 en el punto medio t + dt/2 usando k2
         call dpsidt_rk4(psi_temp, gamma, k3)
         psi_temp = psi + k3 * dt
 
-        ! k4 en el extremo t + dt usando k3
         call dpsidt_rk4(psi_temp, gamma, k4)
 
-        ! Combinación final ponderada de las cuatro pendientes para avanzar el estado
         psi = psi + (k1 + k2 * 2.0d0 + k3 * 2.0d0 + k4) * dt / 6.0d0
     
     end subroutine monte_carlo_rk4_step
@@ -344,8 +337,8 @@ program cbp_ej9_qinf
     !-------------------------------------------------------------------------------------------------
     subroutine dpsidt_rk4(psi, gamma, dpsidt)
         implicit none
-        complex(8), intent(in)  :: psi(2)
-        real(8), intent(in)     :: gamma
+        complex(8), intent(in) :: psi(2)
+        real(8), intent(in) :: gamma
         complex(8), intent(out) :: dpsidt(2)
 
         dpsidt(1) = - cmplx(gamma/4.0d0,  1.0d0, 8) * psi(1) - cmplx(gamma/4.0d0, 0.0d0, 8) * psi(2)
@@ -363,7 +356,7 @@ program cbp_ej9_qinf
     !-------------------------------------------------------------------------------------------------
     subroutine bloch_to_state_vector(r, psi)
         implicit none
-        real(8), intent(in)     :: r(3)    ! Vector de Bloch: r(1)=x, r(2)=y, r(3)=z
+        real(8), intent(in) :: r(3)        ! Vector de Bloch: r(1)=x, r(2)=y, r(3)=z
         complex(8), intent(out) :: psi(2)  ! Estado cuántico: psi(1)=alpha, psi(2)=beta
         
         real(8) :: x, y, z, cos_half
@@ -377,11 +370,9 @@ program cbp_ej9_qinf
             psi(1) = cmplx(0.0d0, 0.0d0, 8)
             psi(2) = cmplx(1.0d0, 0.0d0, 8)
         else
-            ! Calculamos alpha (que elegimos real pura)
             cos_half = dsqrt((1.0d0 + z) / 2.0d0)
             psi(1) = cmplx(cos_half, 0.0d0, 8)
             
-            ! Calculamos beta (que absorbe la fase x + i*y)
             psi(2) = cmplx(x, y, 8) / (2.0d0 * cos_half)
         end if
     end subroutine bloch_to_state_vector

@@ -10,20 +10,16 @@ plt.rcParams.update({
     "grid.alpha": 0.5
 })
 
-# 1. Cargar datos
+# Cargar datos
 df = pd.read_csv('cbp_ej10_entropias_S15.dat', sep=r'\s+', comment='#', 
                  names=['Gamma', 'Simulacion', 'S15'])
 
-# 2. Seleccionar 9 valores representativos de Gamma para el panel 3x3
-# Asumiendo que fuiste de 0.0 a 3.0 en pasos de 0.2
+# Seleccionar 9 valores representativos de Gamma para el panel 3x3
 gammas_to_plot = [0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 12.0]
 
-# 3. Crear la figura
 fig, axes = plt.subplots(3, 3, figsize=(12, 10), sharex=True, sharey=True)
 axes = axes.flatten()
 
-# Límite teórico de la entropía para d=16 es ln(16) ≈ 2.77
-# max_entropy = 2.8
 max_entropy = 1
 
 color_hist = "#E66101"
@@ -63,6 +59,5 @@ for i, g in enumerate(gammas_to_plot):
 plt.suptitle('Distribución Estadística de la Entropía de Entrelazamiento', fontsize=16, y=0.98)
 plt.tight_layout()
 
-# Guardar y mostrar
 plt.savefig('panel_histogramas.pdf', dpi=300, bbox_inches='tight')
 print("Done!")

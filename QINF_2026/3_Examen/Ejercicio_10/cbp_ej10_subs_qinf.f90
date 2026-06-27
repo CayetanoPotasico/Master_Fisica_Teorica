@@ -153,7 +153,7 @@ contains
         implicit none
         integer(kind=4), intent(in) :: dim
         complex(kind=8), intent(in) :: matrix(0:dim-1, 0:dim-1)
-        real(kind=8), intent(out)   :: S
+        real(kind=8), intent(out) :: S
 
         ! Parámetros internos para la comunicación con LAPACK (ZHEEV)
         complex(kind=8) :: A(dim, dim)            ! Copia de trabajo de la matriz
@@ -162,26 +162,23 @@ contains
         real(kind=8), allocatable    :: RWORK(:)
         integer(kind=4) :: INFO, LWORK, i
 
-        ! 1. Inicialización y copia de seguridad
+        ! Inicialización y copia de seguridad
         ! ZHEEV sobrescribe la matriz de entrada con vectores propios, por eso usamos 'A'
         A = matrix
         S = 0.0d0
 
-        ! 2. Configuración del espacio de trabajo (Query de memoria para LAPACK)
-        ! LWORK define el tamaño del array de trabajo óptimo para la diagonalización
+        ! Configuración del espacio de trabajo
         LWORK = max(1, 2*dim-1)
         allocate(WORK(LWORK), RWORK(max(1, 3*dim-2)))
 
-        ! 3. LLAMADA A LAPACK (ZHEEV)
-        ! 'N' = No calcular autovectores (Job: None)
-        ! 'U' = Usar triángulo superior (Upper triangle)
+        ! 'N' = No calcular autovectores
+        ! 'U' = Usar triángulo superior
         call zheev('N', 'U', dim, A, dim, W, WORK, LWORK, RWORK, INFO)
 
-        ! 4. Cálculo final de la entropía si la operación fue exitosa (INFO=0)
+        ! Cálculo de entropía
         if (INFO == 0) then
             do i = 1, dim
-                ! Filtro numérico: se ignoran autovalores nulos o negativos por ruido
-                ! para evitar errores en el cálculo del logaritmo natural.
+                ! Se ignoran autovalores nulos o negativos por ruido
                 if (W(i) > 1.0d-14) then
                     S = S - W(i) * log(W(i))
                 end if
@@ -190,7 +187,6 @@ contains
             write(*,*) "¡Error en ZHEEV! No se pudo diagonalizar la matriz. INFO =", INFO
         end if
 
-        ! Liberación de memoria temporal
         deallocate(WORK, RWORK)
         
     end subroutine get_von_neumann_entropy
@@ -209,13 +205,13 @@ contains
         implicit none
         integer(kind=4), intent(in) :: Nqubits
         complex(kind=8), intent(in) :: psi(0:2**Nqubits-1)
-        real(kind=8), intent(out)   :: S_vector(0:2**Nqubits-1)
+        real(kind=8), intent(out) :: S_vector(0:2**Nqubits-1)
 
         integer(kind=4) :: I, complement, dim_A, n_A, b
         complex(kind=8), allocatable :: rho_A(:,:)
-        real(kind=8)    :: entropy
+        real(kind=8) :: entropy
 
-        ! Recorremos solo la mitad de las configuraciones (0 a 2^(Nqubits-1) - 1) ya que la entropía de una partición es idéntica a la de su complemento.
+        ! Recorremos solo la mitad de las configuraciones (0 a 2^(Nqubits-1) - 1) ya que la entropía de una partición es idéntica a la de su complemento
         do I = 0, 2**(Nqubits-1) - 1
 
             ! Determinamos el número de qubits en el subsistema A y su dimensión asociada
@@ -231,7 +227,7 @@ contains
                 entropy = 0.0d0
             else
 
-                ! A. Inicialización de la matriz de densidad reducida
+                ! Inicialización de la matriz de densidad reducida
                 allocate(rho_A(0:dim_A-1, 0:dim_A-1))
 
                 ! Tomamos la traza parcial sobre el subsistema B
@@ -298,14 +294,12 @@ contains
         ! Obtención de la matriz de densidad reducida rho_A
         rho_A = 0.0d0
 
-        ! --- OPTIMIZACIÓN: Intercambiamos i y j para respetar el orden de columnas de Fortran ---
         do j = 0, dim_A - 1
             scatter_bits_j_A = scatter_bits(j, n_A, map_A)
             
             do i = 0, dim_A - 1
                 scatter_bits_i_A = scatter_bits(i, n_A, map_A)
                 
-                ! El bucle k (la traza) se queda dentro
                 do k = 0, 2**n_B - 1
                     scatter_bits_k_B = scatter_bits(k, n_B, map_B)
                     
@@ -343,7 +337,7 @@ contains
         do b = 0, n_bits - 1
             ! Si el bit 'b' está encendido en el índice corto
             if (btest(short_idx, b)) then
-                ! Lo encendemos en la posición real del qubit (mapping)
+                ! Lo encendemos en la posición real del qubit
                 long_idx = ibset(long_idx, mapping(b+1))
             end if
         end do

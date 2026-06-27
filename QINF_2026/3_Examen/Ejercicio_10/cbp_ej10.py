@@ -13,18 +13,16 @@ plt.rcParams.update({
     "grid.alpha": 0.6
 })
 
-# 1. Cargar datos
+# Cargar datos
 df = pd.read_csv('cbp_ej10_entropias_S15.dat', sep=r'\s+', comment='#', 
                  names=['Gamma', 'Simulacion', 'S15'])
 
-# 2. Agrupar por Gamma para sacar la media y la desviación estándar
+# Agrupar por Gamma para sacar la media y la desviación estándar
 stats = df.groupby('Gamma')['S15'].agg(['mean', 'std']).reset_index()
 
 print(stats)
 
-# 3. Dibujar la curva
 plt.figure(figsize=(10, 6))
-
 plt.plot(stats['Gamma'], stats['mean'], '.-', color="#E63301", label=r'$\langle S_{15} \rangle \pm 1\sigma$')
 plt.fill_between(stats['Gamma'], stats['mean'] - stats['std'], stats['mean'] + stats['std'], color="#E66101", alpha=0.2)
 

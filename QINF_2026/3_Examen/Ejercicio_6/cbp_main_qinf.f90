@@ -83,11 +83,11 @@ contains
         character(len=*), intent(in) :: psi_savefile_type
         character(len=3) :: Nqubits_str
 
-        ! Vectores de trabajo (locales a la ejecución de este estado)
+        ! Vectores de trabajo
         complex(kind=8), dimension(0:N-1) :: psi
-        real(kind=8), dimension(0:N-1)    :: S_vector
-        real(kind=8), dimension(Np)       :: b
-        real(kind=8), dimension(Np)       :: J_vector
+        real(kind=8), dimension(0:N-1) :: S_vector
+        real(kind=8), dimension(Np) :: b
+        real(kind=8), dimension(Np) :: J_vector
         integer(kind=4) :: i, j
 
         ! Valores obtenidos del vector phi tal que |psi> = \bigo_i=1^12 |phi>
@@ -102,7 +102,7 @@ contains
         write(*,*) '########################################################################'
         write(*,*) '- Iniciando calculos para ' // psi_file
         
-        ! 1. Lectura de coeficientes del estado psi
+        ! Lectura de coeficientes del estado psi
         call state_vector(psi_file, N, psi)
         write(*,*) '[+] Estado psi leido correctamente.'
 
@@ -117,7 +117,7 @@ contains
         write(10,*) gamma, gamma**2, alpha, beta
         close(10)
 
-        ! 2. Cálculo de entropías de Von Neumann para todas las particiones (2^N)
+        ! Cálculo de entropías de Von Neumann para todas las particiones (2^N)
         call calculate_all_entropies(Nqubits, psi, S_vector)
         write(*,*) '[+] Entropias calculadas correctamente.'
 
@@ -128,18 +128,18 @@ contains
         end do
         close(10)
 
-        ! Análisis intermedio: Verificación de la Ley de Áreas
+        ! Verificación de la Ley de Áreas
         call analyze_area_law(Nqubits, S_vector, psi_savefile_type)
 
-        ! 3. Construcción del término independiente b = A^T * S
+        ! Construcción del término independiente b = A^T * S
         call independent_term_calc(Nqubits, Np, S_vector, b)
         write(*,*) '[+] Vector b calculado correctamente.'
 
-        ! 4. Resolución del sistema de ecuaciones lineales
+        ! Resolución del sistema de ecuaciones lineales
         write(*,*) '[-] Resolviendo el sistema lineal con LAPACK (DGESV)...'
         call solve_linear_system(Nqubits, Np, b, J_vector)
 
-        ! 5. Guardado de la matriz J_ij
+        ! Guardado de la matriz J_ij
         open(unit=20, file='out/matriz_J_'//psi_savefile_type//'_'//trim(adjustl(Nqubits_str))//'.dat', status='replace')
         
         write(20,*) "# Matriz de acoplamientos J(i,j) para "//psi_savefile_type//"con Nqubits = "//trim(adjustl(Nqubits_str))
@@ -176,7 +176,7 @@ contains
 
         integer :: p, r, c, k
         
-        ! Los auto-acoplamientos (diagonal) no están definidos en este modelo
+        ! J_ii = 0
         if (i == j) then
             val = 0.0d0
         else
